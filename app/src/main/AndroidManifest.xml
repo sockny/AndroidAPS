@@ -44,6 +44,19 @@
         android:theme="@style/AppTheme.Launcher">
         <profileable android:shell="true" />
 
+        <service
+            android:name="app.aaps.aod.AodAccessibilityService"
+            android:exported="true"
+            android:label="@string/aod_title"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/aod_accessibility_service" />
+        </service>
+
         <!-- Samsung One UI 7+ shows the persistent notification in its own "Live Notifications"
              drawer section and lock-screen "Now Bar" through a proprietary mechanism, separate
              from (and not yet replaced by) Android's standard promoted-notification APIs used in

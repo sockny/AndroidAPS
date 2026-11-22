@@ -23,4 +23,9 @@
     <string name="settings_unreadable_confirm_text">The unreadable settings file is renamed and kept. All settings start from their defaults. Then you set up AAPS again or import a settings export.</string>
     <string name="settings_unreadable_notification">AAPS is not running. Open AAPS to see what to do.</string>
 
+    <string name="aod_title">Always-on glucose display</string>
+    <string name="aod_service_description">Displays glucose from AAPS on a compatible always-on display using an accessibility overlay. Does not read windows, collect accessibility events, perform gestures or change insulin therapy. Enable separately in AAPS Settings → Glucose display.</string>
+    <string name="aod_no_data">No current CGM data</string>
+    <string name="aod_stale">STALE · %1$s · %2$s</string>
+    <string name="aod_age">%1$s · %2$s</string>
 </resources>

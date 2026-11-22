@@ -80,6 +80,11 @@ alarm_setting|MedtrumStringKey|true
 alert_override_dnd|BooleanKey|true
 allow_hardware_pump|BooleanNonKey|true
 always_use_shortavg|BooleanKey|true
+aod_colour|AodLegacyIntKey|false
+aod_enabled|AodBooleanKey|false
+aod_size|AodIntKey|false
+aod_x|AodIntKey|false
+aod_y|AodIntKey|false
 app_expiration_%s|LongComposedKey|true
 application_password|StringKey|true
 application_pin|StringKey|true
@@ -294,6 +299,7 @@ medtrum_session_token|MedtrumLongNonKey|true
 missed_bg_readings_threshold|IntKey|true
 nextMissedReadingsAlarm|LocalAlertLongKey|false
 nextPumpDisconnectedAlarm|LocalAlertLongKey|false
+notification_glucose_display|GlucoseNotificationKey|false
 notification_reader_dedup_state|StringNonKey|true
 notification_reader_packages|StringNonKey|true
 ns_alarm_stale_data_value|IntKey|true

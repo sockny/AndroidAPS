@@ -60,12 +60,18 @@ import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -106,6 +112,7 @@ class PersistentNotificationPlugin(
     private val processedDeviceStatusData: ProcessedDeviceStatusData,
     private val dateUtil: DateUtil,
     private val trendCalculator: TrendCalculator,
+    private val glucoseNotification: GlucoseNotificationPresenter,
     notificationManager: NotificationManager
 ) : PluginBase(
     PluginDescription()
@@ -147,6 +154,9 @@ class PersistentNotificationPlugin(
     private var scope: CoroutineScope? = null
     private val deferredStart = DeferredForegroundStart()
     private var lastAutoNotificationContent: String = ""
+    private val appearanceUpdates = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private var glucoseExpiryJob: Job? = null
+    private var scheduledGlucoseExpiry: Long? = null
 
     @OptIn(FlowPreview::class)
     override suspend fun onStart() {
@@ -159,6 +169,8 @@ class PersistentNotificationPlugin(
             .collectResilient(newScope, aapsLogger, LTag.CORE, start = CoroutineStart.UNDISPATCHED) { triggerNotificationUpdate() }
         frequentUpdates(newScope)
             .collectResilient(newScope, aapsLogger, LTag.CORE) { triggerNotificationUpdate() }
+        glucoseNotification.changes.drop(1)
+            .collectResilient(newScope, aapsLogger, LTag.CORE, start = CoroutineStart.UNDISPATCHED) { appearanceUpdates.tryEmit(Unit) }
         /// Android Auto - debounced to prevent rapid pop-ups
         // Flow's debounce means the same thing as Rx's: emit once the source has been quiet for the
         // period. UNDISPATCHED is not claimed here - merge subscribes to its sources in child
@@ -202,6 +214,7 @@ class PersistentNotificationPlugin(
     }
 
     override suspend fun onStop() {
+        scheduleGlucoseExpiry(null)
         scope?.cancel()
         scope = null
         deferredStart.cancel()
@@ -225,7 +238,23 @@ class PersistentNotificationPlugin(
             .collectResilient(scope, aapsLogger, LTag.CORE, start = CoroutineStart.UNDISPATCHED) { requests.trySend(Unit) }
         rxBus.toFlow(EventAutosensCalculationFinished::class)
             .collectResilient(scope, aapsLogger, LTag.CORE, start = CoroutineStart.UNDISPATCHED) { requests.trySend(Unit) }
+        appearanceUpdates.collectResilient(scope, aapsLogger, LTag.CORE, start = CoroutineStart.UNDISPATCHED) { requests.trySend(Unit) }
         return requests.receiveAsFlow().debounce(UPDATE_DEBOUNCE)
+    }
+
+    /** One display refresh at expiry if CGM stops, without polling, alarms, or a wake lock. */
+    @Synchronized
+    private fun scheduleGlucoseExpiry(expiresAt: Long?) {
+        val deadline = expiresAt?.takeIf { it > dateUtil.now() }
+        if (deadline == scheduledGlucoseExpiry && glucoseExpiryJob?.isActive == true) return
+        glucoseExpiryJob?.cancel()
+        scheduledGlucoseExpiry = deadline
+        glucoseExpiryJob = deadline?.let {
+            scope?.launch {
+                delay((it - dateUtil.now()).coerceAtLeast(1))
+                appearanceUpdates.tryEmit(Unit)
+            }
+        }
     }
 
     // Called from the collectors, which already run in a coroutine: no runBlocking, which held an IO
@@ -373,21 +402,31 @@ class PersistentNotificationPlugin(
         if (includeAuto) lastAutoNotificationContent = content
         val builder = NotificationCompat.Builder(context, notificationHolder.channelID)
         builder.setOngoing(true)
-        applyLiveUpdate(
-            builder = builder,
-            bgStatusChipText = bgStatusChipText,
-            line1 = line1,
-            line1WithDelta = line1WithDelta,
-            bgMetric = bgMetric,
-            line2 = line2,
-            line3 = line3
-        )
         builder.setOnlyAlertOnce(true)
         builder.setCategory(NotificationCompat.CATEGORY_STATUS)
         builder.setSmallIcon(iconsProvider.getNotificationIcon())
         builder.setContentTitle(line1)
         if (line2 != null) builder.setContentText(line2)
         if (line3 != null) builder.setSubText(line3)
+        // Prepare first, so a rendering failure leaves the original foreground notification intact.
+        val coloured = if (glucoseNotification.enabled) {
+            try {
+                glucoseNotification.prepare(dateUtil.now(), line1, line2, line3)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                aapsLogger.error(LTag.CORE, "Could not prepare glucose notification; using standard notification", e)
+                null
+            }
+        } else null
+        if (coloured != null) {
+            // Samsung's proprietary Standard/Metric live templates replace RemoteViews entirely.
+            // Use the GDH-style drawer while selected; disabling it restores the existing Now Bar.
+            glucoseNotification.apply(builder, coloured)
+        } else {
+            applyLiveUpdate(builder, bgStatusChipText, line1, line1WithDelta, bgMetric, line2, line3)
+        }
+        scheduleGlucoseExpiry(coloured?.data?.expiresAt)
         /// Android Auto
         if (includeAuto && unreadConversationBuilder != null) {
             builder.extend(

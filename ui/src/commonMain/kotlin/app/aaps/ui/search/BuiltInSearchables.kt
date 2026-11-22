@@ -32,6 +32,7 @@ import app.aaps.core.ui.compose.icons.Pump
 import app.aaps.core.ui.compose.preference.PreferenceSubScreenDef
 import app.aaps.core.ui.search.SearchableItem
 import app.aaps.core.ui.search.SearchableProvider
+import app.aaps.ui.compose.preferences.platformGlucoseDisplayPreferences
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -344,6 +345,7 @@ class BuiltInSearchables(
         // Main preference screens (shown in AllPreferencesScreen)
         add(SearchableItem.Category(general))
         add(SearchableItem.Category(appearance))
+        platformGlucoseDisplayPreferences()?.let { add(SearchableItem.Category(it)) }
         add(SearchableItem.Category(protection))
         add(SearchableItem.Category(pump))
         add(SearchableItem.Category(alerts))

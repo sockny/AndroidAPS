@@ -34,6 +34,12 @@ import dev.zacsweers.metro.Provides
 @BindingContainer
 object AppReceiversBindings {
 
+    @Provides
+    @FeatureMemberInjectors
+    @IntoMap
+    @ClassKey(app.aaps.aod.AodAccessibilityService::class)
+    fun bindAodService(injector: MembersInjector<app.aaps.aod.AodAccessibilityService>): MembersInjector<*> = injector
+
     // Android builds this one from a notification action, so it must be in the map like the rest.
     // It was converted to MetroBroadcastReceiver without an entry here, and tapping Mute or Dismiss
     // on the background alarm notification then died with "No Metro binding for AlarmMuteReceiver"

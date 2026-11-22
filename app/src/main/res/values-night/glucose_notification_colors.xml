@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="glucose_notification_text">#FFE8EAED</color>
+    <color name="glucose_notification_secondary_text">#FFBDC1C6</color>
+</resources>

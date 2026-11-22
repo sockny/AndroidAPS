@@ -223,6 +223,11 @@ class MainApp : Application(), MetroMemberInjector, MetroViewModelFactoryOwner, 
         // As early as possible, so the first screen is already in it
         applyAppLanguage()
         appLocales = resources.configuration.locales
+        // Local display settings must be known to import/export even before AOD is first enabled.
+        preferences.registerPreferences(
+            app.aaps.core.keys.AodBooleanKey.entries + app.aaps.core.keys.AodIntKey.entries + app.aaps.core.keys.AodLegacyIntKey.entries +
+                app.aaps.core.keys.GlucoseNotificationKey.entries
+        )
         // Applies the analytics opt-out. Must come before configureLeakCanary below, which reports
         // through fabricPrivacy.
         fabricPrivacyImpl.start()

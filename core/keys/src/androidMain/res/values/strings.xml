@@ -428,4 +428,14 @@
 
     <!--    Appearance preferences-->
 
+    <!-- Device-local glucose presentation (Android only). -->
+    <string name="aod_enable">Always-on display</string>
+    <string name="aod_enable_summary">Show glucose while the phone is locked and its display is not interactive. Requires the AAPS AOD accessibility service and a compatible always-on display.</string>
+    <string name="notification_glucose_enable">Coloured glucose notification</string>
+    <string name="notification_glucose_summary">Show glucose and trend in the ongoing notification and a numeric status bar icon. Colours match the glucose colours and theme of the overview. Turn off to restore the standard notification and supported live templates.</string>
+    <string name="aod_size">AOD text size</string>
+    <string name="aod_size_summary">Text size in scale-independent pixels (24–96 sp).</string>
+    <string name="aod_x">AOD horizontal position</string>
+    <string name="aod_y">AOD vertical position</string>
+    <string name="aod_position_summary">Position within the available screen area, from 0 to 100 percent. Small automatic shifts reduce stationary pixels.</string>
 </resources>

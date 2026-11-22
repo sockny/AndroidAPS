@@ -382,4 +382,16 @@
     <string name="cal_precheck_mark_sensor_change">Mark sensor change</string>
     <string name="graph_therapy_event_bg_with_note" comment="Shown when the user taps a BG check in the overview graph. %1$s = glucose with its unit, %2$s = the note the user wrote. Example: 6.1 mmol/L, before lunch">%1$s, %2$s</string>
 
+    <string name="glucose_display_title">Glucose display</string>
+    <string name="glucose_display_summary">Notification and always-on display</string>
+    <string name="glucose_display_settings">Display settings</string>
+    <string name="glucose_display_general">General</string>
+    <string name="glucose_display_advanced">Advanced</string>
+    <string name="aod_compatibility">Enable always-on display in your phone settings. Overlay visibility depends on the device and Android version; some always-on displays do not support it. AAPS never turns on the screen to force visibility.</string>
+    <string name="aod_accessibility_enabled">AOD accessibility service enabled</string>
+    <string name="aod_accessibility_disabled">AOD accessibility service disabled</string>
+    <string name="aod_open_accessibility">Open accessibility settings</string>
+    <string name="glucose_display_data_age">Old readings are crossed out and their trend is hidden. Missing data shows a dash. The notification icon becomes a question mark when data is old or missing. The reading time remains visible. This display does not replace AAPS alarms.</string>
+    <string name="aod_burn_in">The AOD overlay shifts every minute while the CPU is awake. It does not wake the CPU; updates and movement may pause in deep sleep. Moderate text size and your phone’s AOD brightness and schedule reduce power use and burn-in risk, but cannot eliminate them.</string>
+    <string name="notification_glucose_icon_tint">Notification and AOD glucose colours match the AAPS overview, including its low/high display marks and light/dark theme. Android may apply its own tint to the small status bar icon.</string>
 </resources>

@@ -265,6 +265,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
 
     testImplementation(project(":shared:tests"))
+    testImplementation(libs.org.robolectric)
+    testRuntimeOnly(libs.org.junit.vintage.engine)
     androidTestImplementation(project(":shared:tests"))
     androidTestImplementation(libs.androidx.test.rules)
     // UiAutomator for the in-process E2E UI test (app/src/androidTest/.../e2e). Drives the real

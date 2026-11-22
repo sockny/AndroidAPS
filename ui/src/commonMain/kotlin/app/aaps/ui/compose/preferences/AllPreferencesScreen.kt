@@ -196,6 +196,7 @@ fun AllPreferencesScreen(
                     // Built-in: General settings (first)
                     addPreferenceContent(generalPreferences, onShowMessage, sectionState)
                     addPreferenceContent(appearancePreferences, onShowMessage, sectionState)
+                    platformGlucoseDisplayPreferences()?.let { addPreferenceContent(it, onShowMessage, sectionState) }
 
                     // Built-in: Protection settings
                     addPreferenceContent(protectionPreferences, onShowMessage, sectionState)
